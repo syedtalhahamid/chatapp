@@ -3,14 +3,12 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-# Route for frontend
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Handle chat messages with username
 @socketio.on('send_message')
 def handle_message(data):
     username = data['username']
