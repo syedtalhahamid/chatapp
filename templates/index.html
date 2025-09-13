@@ -4,69 +4,63 @@
     <title>WhatsApp-like Flask Chat</title>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <style>
-        body { font-family: Arial; background: #f0f2f5; text-align: center; }
-        #chat-box { width: 60%; margin: auto; height: 400px; border: 1px solid #ccc; overflow-y: scroll; background: #fff; padding: 10px; }
-        #message, #username, #room { padding: 10px; margin: 5px; }
-        #send, #join { padding: 10px; }
-        .msg { display: flex; margin: 5px 0; }
-        .msg.left { justify-content: flex-start; }
-        .msg.right { justify-content: flex-end; }
-        .bubble { padding: 10px; border-radius: 10px; max-width: 60%; }
-        .bubble.user { background: #007bff; color: #fff; }
-        .bubble.other { background: #e5e5ea; color: #000; }
-        .time { font-size: 0.7em; margin-left: 5px; }
+        body { font-family: Arial; background: #f7f7f7; }
+        #chat-container { width: 60%; margin: auto; }
+        #chat-box { height: 400px; border: 1px solid #ccc; overflow-y: scroll; background: #fff; padding: 10px; }
+        #username, #message { padding: 10px; margin: 5px; width: calc(100% - 24px); }
+        #send { padding: 10px; margin: 5px; width: 100%; background: #007bff; color: white; border: none; cursor: pointer; }
+        .msg { margin: 5px 0; }
+        .me { text-align: right; }
+        .user { font-weight: bold; }
     </style>
 </head>
 <body>
-    <h2>WhatsApp-like Real-Time Chat</h2>
-
-    <input id="username" placeholder="Enter your name" />
-    <input id="room" placeholder="Enter room name" />
-    <button id="join">Join Room</button>
-    
-    <div id="chat-box"></div>
-    
-    <input id="message" placeholder="Type your message..." />
-    <button id="send">Send</button>
+    <div id="chat-container">
+        <h2>WhatsApp-like Chat</h2>
+        <input id="username" placeholder="Enter your name" />
+        <div id="chat-box"></div>
+        <input id="message" placeholder="Type your message..." />
+        <button id="send">Send</button>
+    </div>
 
     <script>
-        var socket = io();
-        var currentUser = '';
-        var currentRoom = '';
+        const socket = io();
+        const usernameInput = document.getElementById("username");
+        const messageInput = document.getElementById("message");
+        const chatBox = document.getElementById("chat-box");
 
-        document.getElementById('join').onclick = function() {
-            currentUser = document.getElementById('username').value || 'Anonymous';
-            currentRoom = document.getElementById('room').value || 'default';
-            socket.emit('join', {username: currentUser, room: currentRoom});
-            document.getElementById('chat-box').innerHTML = '';
-        };
-
-        document.getElementById('send').onclick = function() {
-            let msg = document.getElementById('message').value;
-            if(msg.trim() !== '' && currentUser && currentRoom) {
-                socket.emit('send_message', {username: currentUser, message: msg, room: currentRoom});
-                document.getElementById('message').value = '';
+        document.getElementById("send").onclick = function() {
+            if(usernameInput.value.trim() === "") {
+                alert("Enter your name first!");
+                return;
             }
+            socket.emit("join", {username: usernameInput.value});
+            socket.emit("send_message", {message: messageInput.value});
+            messageInput.value = "";
         };
 
-        socket.on('chat_history', function(messages) {
-            messages.forEach(function(data) { displayMessage(data); });
+        socket.on("receive_message", function(data) {
+            const div = document.createElement("div");
+            div.className = "msg";
+            if(data.username === usernameInput.value) div.className += " me";
+            div.innerHTML = "<span class='user'>" + data.username + ":</span> " + data.message;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
 
-        socket.on('receive_message', function(data) {
-            displayMessage(data);
+        socket.on("user_joined", function(data) {
+            const div = document.createElement("div");
+            div.className = "msg";
+            div.innerHTML = "<em>" + data.username + " joined the chat</em>";
+            chatBox.appendChild(div);
         });
 
-        function displayMessage(data) {
-            let div = document.createElement('div');
-            div.className = 'msg ' + (data.username === currentUser ? 'right' : 'left');
-            let bubble = document.createElement('div');
-            bubble.className = 'bubble ' + (data.username === currentUser ? 'user' : 'other');
-            bubble.innerHTML = `<strong>${data.username}:</strong> ${data.message} <span class="time">${data.time}</span>`;
-            div.appendChild(bubble);
-            document.getElementById('chat-box').appendChild(div);
-            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
-        }
+        socket.on("user_left", function(data) {
+            const div = document.createElement("div");
+            div.className = "msg";
+            div.innerHTML = "<em>" + data.username + " left the chat</em>";
+            chatBox.appendChild(div);
+        });
     </script>
 </body>
 </html>
