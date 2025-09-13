@@ -14,7 +14,6 @@
 </head>
 <body>
     <h2>💬 Real-Time Flask Chat</h2>
-
     <input id="username" placeholder="Enter your name" />
     <div id="chat-box"></div>
     <input id="message" placeholder="Type your message..." />
@@ -23,7 +22,6 @@
     <script>
         var socket = io();
 
-        // Send message on button click
         document.getElementById("send").onclick = function() {
             let msg = document.getElementById("message").value;
             let user = document.getElementById("username").value || "Anonymous";
@@ -33,7 +31,6 @@
             }
         };
 
-        // Display incoming messages
         socket.on("receive_message", function(data) {
             let div = document.createElement("div");
             div.className = "msg";
