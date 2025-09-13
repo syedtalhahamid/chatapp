@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Chat App</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial; background: #f7f7f7; text-align: center; }
+        #chat-box { width: 60%; margin: auto; height: 400px; border: 1px solid #ccc; overflow-y: scroll; background: #fff; padding: 10px; }
+        #message, #username { padding: 10px; margin: 5px; }
+        #send { padding: 10px; }
+        .msg { text-align: left; padding: 5px; border-bottom: 1px solid #eee; }
+        .user { font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h2>💬 Real-Time Flask Chat</h2>
+
+    <input id="username" placeholder="Enter your name" />
+    <div id="chat-box"></div>
+    <input id="message" placeholder="Type your message..." />
+    <button id="send">Send</button>
+
+    <script>
+        var socket = io();
+
+        // Send message on button click
+        document.getElementById("send").onclick = function() {
+            let msg = document.getElementById("message").value;
+            let user = document.getElementById("username").value || "Anonymous";
+            if (msg.trim() !== "") {
+                socket.emit("send_message", {username: user, message: msg});
+                document.getElementById("message").value = "";
+            }
+        };
+
+        // Display incoming messages
+        socket.on("receive_message", function(data) {
+            let div = document.createElement("div");
+            div.className = "msg";
+            div.innerHTML = "<span class='user'>" + data.username + ":</span> " + data.message;
+            document.getElementById("chat-box").appendChild(div);
+            document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+        });
+    </script>
+</body>
+</html>
