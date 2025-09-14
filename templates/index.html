@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WhatsApp-like Flask Chat</title>
-    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <style><!DOCTYPE html>
-<html>
-<head>
   <title>Chat App</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
   <style>
@@ -55,66 +50,5 @@
       chat.scrollTop = chat.scrollHeight;
     });
   </script>
-</body>
-</html>
-
-        body { font-family: Arial; background: #f7f7f7; }
-        #chat-container { width: 60%; margin: auto; }
-        #chat-box { height: 400px; border: 1px solid #ccc; overflow-y: scroll; background: #fff; padding: 10px; }
-        #username, #message { padding: 10px; margin: 5px; width: calc(100% - 24px); }
-        #send { padding: 10px; margin: 5px; width: 100%; background: #007bff; color: white; border: none; cursor: pointer; }
-        .msg { margin: 5px 0; }
-        .me { text-align: right; }
-        .user { font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div id="chat-container">
-        <h2>WhatsApp-like Chat</h2>
-        <input id="username" placeholder="Enter your name" />
-        <div id="chat-box"></div>
-        <input id="message" placeholder="Type your message..." />
-        <button id="send">Send</button>
-    </div>
-
-    <script>
-        const socket = io();
-        const usernameInput = document.getElementById("username");
-        const messageInput = document.getElementById("message");
-        const chatBox = document.getElementById("chat-box");
-
-        document.getElementById("send").onclick = function() {
-            if(usernameInput.value.trim() === "") {
-                alert("Enter your name first!");
-                return;
-            }
-            socket.emit("join", {username: usernameInput.value});
-            socket.emit("send_message", {message: messageInput.value});
-            messageInput.value = "";
-        };
-
-        socket.on("receive_message", function(data) {
-            const div = document.createElement("div");
-            div.className = "msg";
-            if(data.username === usernameInput.value) div.className += " me";
-            div.innerHTML = "<span class='user'>" + data.username + ":</span> " + data.message;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-        socket.on("user_joined", function(data) {
-            const div = document.createElement("div");
-            div.className = "msg";
-            div.innerHTML = "<em>" + data.username + " joined the chat</em>";
-            chatBox.appendChild(div);
-        });
-
-        socket.on("user_left", function(data) {
-            const div = document.createElement("div");
-            div.className = "msg";
-            div.innerHTML = "<em>" + data.username + " left the chat</em>";
-            chatBox.appendChild(div);
-        });
-    </script>
 </body>
 </html>
